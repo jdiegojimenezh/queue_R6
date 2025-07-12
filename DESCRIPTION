@@ -1,0 +1,25 @@
+Package: R6arqas
+Type: Package
+Title: Application in R for Queueing Analysis and Simulation (R6 Refactor)
+Version: 0.0.1
+Authors@R: 
+    person("Juan Diego", "Jiménez Herrera", , "juan.jimenez@epn.edu.ec", role = c("aut", "cre"))
+Description: R6 refactor of the original arqas package. Provides analytical metrics for classic queueing models (M/M/1, M/M/s, etc.).
+Depends: R (>= 3.6)
+Imports: R6, distr, doParallel, foreach, stats, fitdistrplus, ggplot2, grid, graphics
+Suggests: roxygen2, devtools
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: false
+Roxygen: list(markdown = TRUE, r6 = FALSE)
+RoxygenNote: 7.3.2
+Collate: 
+    'AuxSimulateModels.R'
+    'MarkovianModel.R'
+    'ComplexModels.R'
+    'DistributionAnalysis.R'
+    'GraphicsAux.R'
+    'SimpleModels.R'
+    'NetworModels.R'
+    'SimulateModels.R'
+    'zzz.R'
