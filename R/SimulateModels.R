@@ -1,14 +1,3 @@
-# ====================================================================
-#  SimulateModels.R – R6 queueing models (simulation based)
-# --------------------------------------------------------------------
-#  This file defines the first refactored model: a single–server
-#  G/G/1 queue simulated by discrete‑event logic. The implementation
-#  is a faithful port of the original S3 version, now wrapped in an
-#  R6 class so it integrates with the rest of the new package design.
-#  All comments and documentation are in ASCII‑only English to comply
-#  with CRAN portability rules.
-# ====================================================================
-
 #' GG1Sim – simulated G/G/1 queue (R6)
 #'
 #' @description R6 class that simulates a single‑server queue with a
@@ -599,6 +588,7 @@ GG1KSim <- R6::R6Class(
       n_w <- self$staClients
       n_m <- self$nClients
       n_total <- (n_w + n_m) * 2L          # overshoot to ensure enough times
+      nServed <- 0L
 
       # generate inter-arrival and service times ----------------------
       tArr  <- r(self$arrivalDistribution)(n_total)
@@ -689,6 +679,7 @@ GG1KSim <- R6::R6Class(
           }
         } else {                            # departure
           sys  <- sys - 1L
+          nServed <- nServed + 1L
           if (sys > 0) iServ <- iServ + 1L
         }
 
@@ -702,16 +693,19 @@ GG1KSim <- R6::R6Class(
       }
 
       # statistics ----------------------------------------------------
+      lambda_eff <- nServed / (t - tWarm)
       L  <- cCum / (t - tWarm)
       Lq <- dCum / (t - tWarm)
-      W  <- cCum / n_m
-      Wq <- dCum / n_m
+      W  <- cCum / nServed
+      Wq <- dCum / nServed
       rho <- L - Lq
       eff <- W / (W - Wq)
 
       out <- list(l = L, lq = Lq, w = W, wq = Wq,
+                  lambda_eff = lambda_eff,
                   rho = rho, eff = eff,
-                  pn = pnVec / (t - tWarm))
+                  pn = pnVec / (t - tWarm),
+                  lost = lost)
       if (self$historic) out$historic <- hist
       self$out <- out
     }
@@ -1111,6 +1105,7 @@ GG1_Inf_HSIMHSim <- R6::R6Class(
       iServ   <- 1L
 
       sys  <- 0L; simC <- 0L; t <- 0
+      nServed <- 0L
       cCum <- dCum <- 0
       pnVec <- numeric(n_m)
 

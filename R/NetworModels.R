@@ -267,7 +267,7 @@ ClosedJackson <- R6::R6Class(
     .mu = NULL, .servers = NULL, .P = NULL,
     .n = NULL, .k = NULL, .lambda_rel = NULL,
     .L_vec = NULL, .Lq_vec = NULL, .W_vec = NULL, .Wq_vec = NULL,
-    .gkn = NULL,
+    .gkn = NULL, .barlambda = NULL,
 
     compute_lambda_relative = function() {
       k <- private$.k
@@ -286,28 +286,86 @@ ClosedJackson <- R6::R6Class(
     },
 
     compute_metrics = function() {
-      ps <- list(mu = private$.mu, servers = private$.servers,
-                 out = list(rho = private$.lambda_rel / private$.mu),
-                 k = private$.k, n = private$.n)
-      class(ps) <- "partial"
+      k   <- private$.k
+      n   <- private$.n
+      mu       <- private$.mu
+      s        <- private$.servers
+      P        <- private$.P
+      lambda_r <- private$.lambda_rel
 
-      g <- calculateG(ps)
-      private$.gkn <- g[private$.k, private$.n + 1]
-      self$g_matrix <- g
 
-      rho <- private$.lambda_rel / private$.mu
-      private$.L_vec  <- rho / (1 - rho)
-      private$.Lq_vec <- (rho^2)/(1 - rho)
-      private$.W_vec  <- private$.L_vec / private$.lambda_rel
-      private$.Wq_vec <- private$.Lq_vec / private$.lambda_rel
+      L_vec  <- numeric(k)
+      Lq_vec <- numeric(k)
+      W_vec  <- numeric(k)
+      Wq_vec <- numeric(k)
+      barlam <- numeric(k)
+
+      shift <- c(k, 1:(k-1))
+      gkn   <- NA
+      ccte  <- NA
+
+      for (idx in k:1) {
+        ps <- list(mu     = mu,
+                   servers = s,
+                   out     = list(rho = lambda_r/mu),
+                   k       = length(mu),
+                   n       = n)
+        class(ps) <- "partial"
+
+        g <- calculateG(ps)
+
+        if (is.na(gkn))
+          gkn <- g[length(mu), n + 1]
+
+        i <- 1:n
+        Pn_last <- (f_close(ps, length(mu), i) * g[length(mu)-1, n - i + 1]) / gkn
+        L <- sum(i * Pn_last)
+
+        if (idx == k) {
+          mult <- pmin(i, s[length(mu)])
+          barlambda_k <- mu[length(mu)] * sum(mult * Pn_last)
+          ccte <- barlambda_k / lambda_r[length(mu)]
+        }
+
+        barlambda <- ccte * lambda_r[length(mu)]
+        W  <- L / barlambda
+        Wq <- W - 1/mu[length(mu)]
+        Lq <- barlambda * Wq
+
+        L_vec [idx] <- L
+        Lq_vec[idx] <- Lq
+        W_vec [idx] <- W
+        Wq_vec[idx] <- Wq
+        barlam [idx] <- barlambda
+
+        if (length(mu) > 1) {
+          mu       <- mu[shift]
+          s        <- s[shift]
+          lambda_r <- lambda_r[shift]
+          P        <- P[shift, shift]
+        }
+      }
+
+      private$.gkn        <- gkn
+      private$.L_vec      <- L_vec
+      private$.Lq_vec     <- Lq_vec
+      private$.W_vec      <- W_vec
+      private$.Wq_vec     <- Wq_vec
+      private$.barlambda  <- barlam
+
+      ps0 <- list(mu = private$.mu, servers = private$.servers,
+                  out = list(rho = private$.barlambda /(private$.mu * private$.servers)),
+                  k = k, n = n)
+      class(ps0) <- "partial"
+      self$g_matrix <- calculateG(ps0)
 
       self$out <- list(
-        rho = rho,
-        L = private$.L_vec,
-        Lq = private$.Lq_vec,
-        W  = private$.W_vec,
-        Wq = private$.Wq_vec
-        )
+        rho = private$.barlambda / (private$.mu * private$.servers),
+        L   = L_vec,
+        Lq  = Lq_vec,
+        W   = W_vec,
+        Wq  = Wq_vec
+      )
     }
   )
 )
