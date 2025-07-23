@@ -4,7 +4,7 @@ Title: Application in R for Queueing Analysis and Simulation (R6 Refactor)
 Version: 0.0.1
 Authors@R: 
     person("Juan Diego", "Jiménez Herrera", , "juan.jimenez@epn.edu.ec", role = c("aut", "cre"))
-Description: R6 refactor of the original arqas package. Provides analytical metrics for classic queueing models (M/M/1, M/M/s, etc.).
+Description: Provides analytical and simulation-based tools for classical queueing models (e.g., M/M/1, M/M/s, M/M/1/K, G/G/1, and Jackson networks) using a fully object-oriented design with R6 classes. Includes reusable components, vectorized computations, and built-in support for model validation and visualization.
 Depends: R (>= 3.6)
 Imports: R6, distr, doParallel, foreach, stats, fitdistrplus, ggplot2, grid, graphics
 Suggests: roxygen2, devtools
