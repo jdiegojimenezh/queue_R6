@@ -1,4 +1,4 @@
-Package: R6arqas
+Package: queueR6
 Type: Package
 Title: Application in R for Queueing Analysis and Simulation (R6 Refactor)
 Version: 0.0.1
