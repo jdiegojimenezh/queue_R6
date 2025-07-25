@@ -6,7 +6,7 @@ Authors@R:
     person("Juan Diego", "Jiménez Herrera", , "juan.jimenez@epn.edu.ec", role = c("aut", "cre"))
 Description: Provides analytical and simulation-based tools for classical queueing models (e.g., M/M/1, M/M/s, M/M/1/K, G/G/1, and Jackson networks) using a fully object-oriented design with R6 classes. Includes reusable components, vectorized computations, and built-in support for model validation and visualization.
 Depends: R (>= 3.6)
-Imports: R6, distr, doParallel, foreach, stats, fitdistrplus, ggplot2, grid, graphics
+Imports: R6, distr, doParallel, foreach, stats, fitdistrplus, ggplot2, grid, graphics, gridExtra, reshape2
 Suggests: roxygen2, devtools
 License: MIT + file LICENSE
 Encoding: UTF-8
